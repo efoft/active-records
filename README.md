@@ -31,6 +31,9 @@ The package consists of the main class ActiveRecords and some Database Handlers.
 * MongoDB
   * on localhost without auth to database named 'testdb':
 ```
+use ActiveRecords\ActiveRecords;
+use ActiveRecords\Handlers\MongoDBHandler;
+
 $ar = new ActiveRecords(new MongoDBHandler('testdb'));
 ```
   * on another host with auth and non-default port:
@@ -41,6 +44,9 @@ $ar = new ActiveRecords(new MongoDBHandler('testdb','username','password','host.
 * MySQL
   * on localhost with auth to database named 'testdb':
 ```
+use ActiveRecords\ActiveRecords;
+use ActiveRecords\Handlers\MySQLHandler;
+
 $ar = new ActiveRecords(new MySQLHandler('testdb','username','password'));
 ```
   * on another host with specific charset (UTF-8 is default):
@@ -50,6 +56,9 @@ $ar = new ActiveRecords(new MySQLHandler('testdb','username','password','host.ex
 
 * SQLite
 ```
+use ActiveRecords\ActiveRecords;
+use ActiveRecords\Handlers\SQLiteHandler;
+
 $ar = new ActiveRecords(new SQLiteHandler('path/to/dbfile.sqlite'));
 ```
 ! Make sure path to db file is writable.
