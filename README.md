@@ -29,21 +29,21 @@ and require it:
 The package consists of the main class ActiveRecords and some Database Handlers. When initialize the class instance you need to specify one of the Handlers. Each type of the Handler in turn requires some parameters for database connection.
 
 * MongoDB
-.. on localhost without auth to database named 'testdb':
+  * on localhost without auth to database named 'testdb':
 ```
 $ar = new ActiveRecords(new MongoDBHandler('testdb'));
 ```
-.. on another host with auth and non-default port:
+  * on another host with auth and non-default port:
 ```
 $ar = new ActiveRecords(new MongoDBHandler('testdb','username','password','host.example.com', 27018));
 ```
 
 * MySQL
-.. on localhost with auth to database named 'testdb':
+  * on localhost with auth to database named 'testdb':
 ```
 $ar = new ActiveRecords(new MySQLHandler('testdb','username','password'));
 ```
-.. on another host with specific charset (UTF-8 is default):
+  * on another host with specific charset (UTF-8 is default):
 ```
 $ar = new ActiveRecords(new MySQLHandler('testdb','username','password','host.example.com',3306,'cp1252'));
 ```
