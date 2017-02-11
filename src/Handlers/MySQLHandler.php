@@ -154,7 +154,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
     if ( ! $tblname )
     {
       if ( NULL === $tblname = $this->tblname )
-        throw new \LogicException('Table name must be either set via setTable() method or must be explicitly defined as argument to insert()');
+        throw new \LogicException('Table name must be either set via setTable() method or must be explicitly defined as argument');
     }
 
     $this->queryValues = array();
