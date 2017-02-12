@@ -149,7 +149,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
     return $where ? ' WHERE ' . substr($where, 5) : '';
   }
 
-  private function buildQuery($type, $what = array(), $where = array(), $sort = array(), $limit = NULL, $tblname = NULL)
+  private function buildQuery($type, $what = array(), $where = array(), $tblname = NULL, $sort = array(), $limit = NULL)
   {
     if ( ! $tblname )
     {
@@ -209,14 +209,14 @@ class MySQLHandler extends DataValidator implements HandlerInterface
     if ( ! $this->validated($data) )
       return;
 
-    $sql = $this->buildQuery(self::QUERY_INSERT,$data, $tblname);
+    $sql = $this->buildQuery(self::QUERY_INSERT,$data, array(), $tblname);
     $this->exec($sql, $this->queryValues);
     return $this->dbh->lastInsertId();
   }
 
   public function get($criteria = array(), $projection = array(), $sort = array(), $limit = NULL, $tblname = NULL)
   {
-    $sql = $this->buildQuery(self::QUERY_SELECT, $projection, $criteria, self::normalize_sort($sort), $limit, $tblname);
+    $sql = $this->buildQuery(self::QUERY_SELECT, $projection, $criteria, $tblname, self::normalize_sort($sort), $limit);
     return $this->exec($sql, $this->queryValues);
   }
 
@@ -234,7 +234,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
 
   public function delete($criteria = array(), $tblname = NULL)
   {
-    $sql = $this->buildQuery(self::QUERY_DELETE, $criteria, $tblname);
+    $sql = $this->buildQuery(self::QUERY_DELETE, $criteria, array(), $tblname);
     $this->exec($sql, $this->queryValues);
   }
 }
