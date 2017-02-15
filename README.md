@@ -74,6 +74,7 @@ $ar->add($data, 'table2');
 If you set table name via setTable it stays default table for all cases when the table is not specified explicitly in operations.
 
 #### Add (insert) data
+Usage: $ar->add($data, [$tablename]);
 ```
 $data = array(
   'name' => 'Testuser2',
@@ -112,6 +113,7 @@ else
 }
 ```
 #### Update data
+Usage: $ar->update($criteria, $data, [$tblname]);
 ```
 $ar->update(array('id'=>'12'), array('age'=>'36','name'=>'Testuser2'));
 ```
@@ -124,9 +126,9 @@ $ar->delete(array('age'=>'36'));
 Delete all records where age field has value 36.
 
 #### Get data
-There are 2 methods:
-* get($criteria, $projection, $sort, $limit, $tblname) - returns multi-dimentional associative array with all found records data
-* getOne($criteria, $projection, $tblname) - return single record as associative array
+There are 2 methods of usage:
+* get($criteria, [$projection], [$sort], [$limit], [$tblname]) - returns multi-dimentional associative array with all found records data
+* getOne($criteria, [$projection], [$tblname]) - return single record as associative array
 
 All arguments are optional. Below are the description of them:
 ..$criteria - associative array with db field names as keys. Values may be as exact value or regexp. For MongoDB full regexp syntax is supported and is simply transfered to mongodb commands. For MySQL/SQLite the syntax is converted to SQL format, so only limited syntax is accepted:
