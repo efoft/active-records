@@ -191,6 +191,9 @@ class MySQLHandler extends DataValidator implements HandlerInterface
    */
   private static function normalize_sort($sort)
   {
+    if ( ! is_array($sort) )
+      throw new \InvalidArgumentException(sprintf('Array expected as argument, %s is given.', gettype($sort)));
+    
     foreach($sort as $k=>&$v)
     {
       if ( $v === 1 )
