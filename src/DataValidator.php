@@ -3,6 +3,7 @@ namespace ActiveRecords;
 
 class DataValidator
 {
+  const ERROR_EMPTY_SET = 1000;
   const ERROR_NOT_ASSOC = 1001;
   const ERROR_MISSED_MANDATORY_FIELD = 1002;
   const ERROR_RECORD_EXIST = 1003;
@@ -29,17 +30,18 @@ class DataValidator
 
   protected function testMandatoryFields($data)
   {
-    $valid = true;
+    $missed_fields = array();
     foreach($this->mandatory_fields as $field)
     {
       if ( ! isset($data[$field]) )
-      {
-        $valid = false;
-        $this->validation_errors[self::ERROR_MISSED_MANDATORY_FIELD] = sprintf('Mandatory field "%s" is not found.',$field);
-        break;
-      }
+        $missed_fields[] = $field;
     }
-    return $valid;
+    if ( $missed_fields )
+      $this->validation_errors[self::ERROR_MISSED_MANDATORY_FIELD] = array(
+        'errmsg'  =>'Mandatory field(-s) not found.',
+        'extinfo' => $missed_fields
+      );
+    return (bool) ! $missed_fields;
   }
 
   protected function testRecordExist($data)
@@ -51,7 +53,10 @@ class DataValidator
         $criteria[$field] = $data[$field];
     }
     if ( $exists = (bool)$this->getOne($criteria) )
-      $this->validation_errors[self::ERROR_RECORD_EXIST] = sprintf('Record already exists: %s',print_r($criteria, true));
+      $this->validation_errors[self::ERROR_RECORD_EXIST] = array(
+        'errmsg'  => 'Record already exists matching criteria: %s',print_r($criteria, true),
+        'extinfo' => $exists
+      );
     return $exists;
   }
 
@@ -63,18 +68,27 @@ class DataValidator
    */
   private function isAssocArray()
   {
-   $retval = true;
-   // check whether each of args is associatiave array (keys are strings)
-   foreach( func_get_args() as $arg )
-   {
-     if ( ! is_array($arg) || count(array_filter(array_keys($arg),'is_string')) === 0 )
-     {
-       $this->validation_errors[self::ERROR_NOT_ASSOC] = sprintf('Data supplied is %s, not associative array.', print_r($arg, true));
-       $retval = false;
-       break;
-     }
-   }
-  return $retval;
+    $retval = true;
+    // check whether each of args is associatiave array (keys are strings)
+    foreach( func_get_args() as $arg )
+    {
+      if ( empty($arg) )
+      {
+        $this->validation_errors[self::ERROR_EMPTY_SET] = array('errmsg'=>'Empty set received.', 'extinfo'=>'');
+        $retval = false;
+        break;
+      }
+      elseif ( ! is_array($arg) || count(array_filter(array_keys($arg),'is_string')) === 0 )
+      {
+        $this->validation_errors[self::ERROR_NOT_ASSOC] = array(
+          'errmsg'  => 'Data supplied is not associative array.',
+          'extinfo' => print_r($arg, true)
+        );
+        $retval = false;
+        break;
+      }
+    }
+    return $retval;
   }
 
   public function validated($data)
