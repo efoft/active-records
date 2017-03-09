@@ -8,20 +8,15 @@ The package gives a simple and unified interface to interact with various databa
 
 ### Installation
 ------
-The package is intended to be used via Composer. It currently is not on Packagist, so add this repository description to you composer.json:
-```
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/efoft/active-records"
-        },
-    ]
-```
-and require it:
+The package is intended to be used via Composer. Add this to you composer.json:
 ```
     "require": {
         "efoft/active-records" : "dev-master"
     }
+```
+or simply run from command-line:
+```
+composer require efoft/active-records
 ```
 
 ### Initialization
@@ -62,6 +57,47 @@ use ActiveRecords\Handlers\SQLiteHandler;
 $ar = new ActiveRecords(new SQLiteHandler('path/to/dbfile.sqlite'));
 ```
 ! Make sure path to db file is writable.
+
+### Database preparation
+Unkike MongoDB, which is schemaless and doesn't require any preparation, for SQL engines you first need to create database and tables in it. MongoDB has very convinient fiture to store sequential arrays (sets) as a field in a doc. 
+```
+{ "_id" : ObjectId("58c12662a068f30f1f8b4567"), "name" : "John", "age" : NumberLong(28), "tags" : [  "four",  "six" ], "imgs" : [  "john.jpg",  "all.png" ] }
+```
+To emulate such feature with SQL DB, this package uses a separate database table (subtables) for every such field. So if the call to DB tries to search through such sets than related subtables are left joined. And when set modification is requested, separate queries to the subtables are being run to perform this. From performance perpective it's definately not the best solution for havy usage but acceptable for relatively small loads. 
+
+In MySQL 5.7 there is JSON type fields support so the same behavior can be achived with JSON approach in a future.
+
+If you plan to store some information as an arrays (sets), the following steps are recommended:
+  1. The main database table must use InnoDB engine since it supports foreign key contraints.
+  2. For each field that will store a set, create a table with the name of the field and foreign key to the main table (see examples below). 
+  3. Such table __must__ have column named 'relid' of integer type and a column named with the same word as the table itself that will store set's data.
+  
+Below are the examples of creating the main tables "table1" and the subtable "tags" that will store arrays related to the main table's records:
+```
+CREATE TABLE `table1` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` text,
+  `age` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `tags` (
+  `relid` int(11) NOT NULL,
+  `tags` text,
+  KEY `relid` (`relid`),
+  FOREIGN KEY (`relid`) REFERENCES `table1` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+```
+To add the constraint to the existing table use the following query:
+```
+ALTER TABLE tags
+  ADD CONSTRAINT FOREIGN KEY (`relid`) REFERENCES table1(`id`);
+```
+If setting ON DELETE CASCADE constraint is not possible for any reasons than set the attribute:
+```
+$ar->setHandlerAttrt('cascade', false);
+```
+which will activate additional routine to run each time on subtables when the records from the main table is removed. It all needed to avoid orphan records in the subtables.
 
 ### Usage
 ------
@@ -118,6 +154,12 @@ Usage: $ar->update($criteria, $data, [$tblname]);
 $ar->update(array('id'=>'12'), array('age'=>'36','name'=>'Testuser2'));
 ```
 The fields `age` and `name` will be updated for the record with `id` 12.
+
+The $data must be an array and can include special keys '$set', '$addToSet', '$push' and '$pull'. The meaning is equal to what they mean for MongoDB updates. If none of those keys are specified, then '$set' is assumed. Below is the example of mixed $data update:
+```
+$ar->update(array('tags'=>'three'),array('age'=>33, '$addToSet'=>array('tags'=>'two','imgs'=>'jack1.jpg')));
+```
+So the values 'two' and 'jack1.jpg' will be appended to the corresponding arrays 'tags' and 'imgs' if the don't exist there yet, but 'age' will be set to 33 since in this case '$set' is assumed.
 
 #### Delete records
 ```
