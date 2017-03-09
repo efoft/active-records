@@ -167,8 +167,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
   public function fetch($sql, $values = array(), $fetch_single_record = false)
   {
     $this->exec($sql, $values);
-    if ( $this->stmt->rowCount() )
-      return $fetch_single_record ? $this->stmt->fetch($this->fetchMode) : $this->stmt->fetchAll($this->fetchMode);
+    return $fetch_single_record ? $this->stmt->fetch($this->fetchMode) : $this->stmt->fetchAll($this->fetchMode);
   }
 
   /**
