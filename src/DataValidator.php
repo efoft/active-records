@@ -66,7 +66,7 @@ class DataValidator
    * @param   array(s)	origin data to operate with
    * @return  bool			true|false = passed pre-check or not
    */
-  private function isAssocArray()
+  protected function isAssocArray()
   {
     $retval = true;
     // check whether each of args is associatiave array (keys are strings)
