@@ -198,12 +198,13 @@ class MongoDBHandler extends DataValidator implements HandlerInterface
     if ( $data && is_array($data) )
     {
       $supported_modes = array('$set','$addToSet','$pull','$push');
-      // if there is no '$set' already in $data - initialize it
-      if ( ! isset($data['$set']) ) $data['$set'] = array();
-      
+    
       foreach($data as $k=>&$v)
         if ( ! in_array($k, $supported_modes) )
         {
+          // if there is no '$set' already in $data - initialize it
+          if ( ! isset($data['$set']) ) $data['$set'] = array();
+          
           $data['$set'] = array_merge($data['$set'], array($k=>$v));
           unset($data[$k]);
         }
