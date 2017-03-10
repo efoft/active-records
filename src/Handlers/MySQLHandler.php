@@ -244,6 +244,8 @@ class MySQLHandler extends DataValidator implements HandlerInterface
   }
 
   /**
+   * If criteria match the same record multiple times (due to search through subtables), the function will return only distinct records.
+   * 
    * @param   array|null  $criteria   search criteria: what fields must be or look like ('/regexp/'), as wildcards only .* is accepted, /i for case-insensitive
    * @param   array|null  $projection fields to include in the returned set
    * @param   array|null  $sort       fields to order by, assoc array to specify destination like ('field1'=>'ASC'...)
@@ -253,18 +255,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
    */
   public function get($criteria = array(), $projection = array(), $sort = array(), $limit = NULL, $tblname = NULL)
   {
-    $subtables = array();
-    if ( $this->fieldsInSubtables ) $this->splitFieldsSubtables($projection, $subtables);
-    
-    $this->qb->newQuery()->select($projection)->from($this->fixTablename($tblname))->where($criteria)->order(self::normalize_sort($sort))->limit($limit);
-    foreach($this->extractSubtables($criteria) as $subtable)
-      $this->qb->join($subtable,'id','relid')->distinct();
-        
-    if ( ( $result = $this->fetch($this->qb->getQuery(), $this->qb->getBindings()) ) && $subtables )
-      foreach($result as &$record)
-        $this->appendSubtableData($record, $subtables);
-        
-    return $result;
+    return $this->select(false, $criteria, $projection, $sort, $limit, $tblname);
   }
 
   /**
@@ -275,19 +266,32 @@ class MySQLHandler extends DataValidator implements HandlerInterface
    */
   public function getOne($criteria = array(), $projection = array(), $tblname = NULL)
   {
+    return $this->select(true, $criteria, $projection, array(), NULL, $tblname);
+  }
+
+  /**
+   * Single auxiliary function to run by get() and getOne().
+   *
+   */
+  private function select($one = false, $criteria = array(), $projection = array(), $sort = array(), $limit = NULL, $tblname = NULL)
+  {
     $subtables = array();
     if ( $this->fieldsInSubtables ) $this->splitFieldsSubtables($projection, $subtables);
     
-    $this->qb->newQuery()->select($projection)->from($this->fixTablename($tblname))->where($criteria);
+    $this->qb->newQuery()->select($projection)->from($this->fixTablename($tblname))->where($criteria)->order(self::normalize_sort($sort))->limit($limit);
     foreach($this->extractSubtables($criteria) as $subtable)
       $this->qb->join($subtable,'id','relid')->distinct();
-      
-    if ( ( $result = $this->fetch($this->qb->getQuery(), $this->qb->getBindings(), true) ) && $subtables )
-      $this->appendSubtableData($result, $subtables);
-
-    return $result;
+        
+    if ( ( $result = $this->fetch($this->qb->getQuery(), $this->qb->getBindings(), $one) ) && $subtables )
+      if ( $one )
+        $this->appendSubtableData($result, $subtables);
+      else
+        foreach($result as &$record)
+         $this->appendSubtableData($record, $subtables);
+        
+    return $result; 
   }
-
+  
   public function update($criteria = array(), $data, $tblname = NULL)
   {
     $tblname = $this->fixTablename($tblname);
