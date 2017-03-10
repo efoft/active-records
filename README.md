@@ -145,7 +145,7 @@ else
 {
   if ( $errors = $ar->getError() )
     foreach($errors as $k=>$v)
-      echo "$k: $v<br>";
+      echo "$k: msg: $v['errmsg'], extended info: $v['extinfo']<br>";
 }
 ```
 #### Update data
