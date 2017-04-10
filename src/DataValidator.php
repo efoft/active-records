@@ -32,10 +32,9 @@ class DataValidator
   {
     $missed_fields = array();
     foreach($this->mandatory_fields as $field)
-    {
       if ( ! isset($data[$field]) || ! $data[$field] )
         $missed_fields[] = $field;
-    }
+
     if ( $missed_fields )
       $this->validation_errors[self::ERROR_MISSED_MANDATORY_FIELD] = array(
         'errmsg'  =>'Mandatory field(-s) not set.',
@@ -48,11 +47,10 @@ class DataValidator
   {
     $criteria = array();
     foreach($this->unique_record_fields as $field)
-    {
       if ( isset($data[$field]) )
         $criteria[$field] = $data[$field];
-    }
-    if ( $exists = $this->getOne($criteria) )
+
+    if ( $exists = $this->exist($criteria) )
       $this->validation_errors[self::ERROR_RECORD_EXIST] = array(
         'errmsg'  => sprintf('Record already exists matching criteria: %s',print_r($criteria, true)),
         'extinfo' => $exists
