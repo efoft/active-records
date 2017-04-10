@@ -230,7 +230,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
    */
   public function add($data, $tblname = NULL)
   {
-    if ( ! $this->validated($data) ) return;
+    if ( ! $this->validated($data, $tblname) ) return;
     
     $subtables = array();
     if ( $this->fieldsInSubtables ) $this->splitFieldsSubtables($data, $subtables);

@@ -69,9 +69,24 @@ class MongoDBHandler extends DataValidator implements HandlerInterface
     $this->debug = (bool)$debug;
   }
   
+  /**
+   * Checks if a record(-s) matching the supplied criteria exists.
+   *
+   * @param   array         $criteria
+   * @param   string|null   $tblname
+   * @return  boolean
+   */
+  public function exist($criteria = array(), $tblname = NULL)
+  {
+    if ( $this->getOne($criteria, array(), $tblname) )
+      return true;
+    
+    return false;
+  }
+  
   public function add($data, $tblname = NULL)
   {
-    if ( ! $this->validated($data) ) return;
+    if ( ! $this->validated($data, $tblname) ) return;
 
     $coll = $tblname ? $this->db->selectCollection($tblname) : $this->coll;
     $coll->insert($data);

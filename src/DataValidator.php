@@ -43,14 +43,14 @@ class DataValidator
     return (bool) ! $missed_fields;
   }
 
-  protected function testRecordExist($data)
+  protected function testRecordExist($data, $tblname)
   {
     $criteria = array();
     foreach($this->unique_record_fields as $field)
       if ( isset($data[$field]) )
         $criteria[$field] = $data[$field];
 
-    if ( $exists = $this->exist($criteria) )
+    if ( $exists = $this->exist($criteria, $tblname) )
       $this->validation_errors[self::ERROR_RECORD_EXIST] = array(
         'errmsg'  => sprintf('Record already exists matching criteria: %s',print_r($criteria, true)),
         'extinfo' => $exists
@@ -89,7 +89,7 @@ class DataValidator
     return $retval;
   }
 
-  public function validated($data)
+  public function validated($data, $tblname = NULL)
   {
     $bValue = $this->isAssocArray($data);
 
@@ -97,7 +97,7 @@ class DataValidator
       $bValue = $bValue & $this->testMandatoryFields($data);
 
     if ( $bValue && $this->unique_record_fields )
-      $bValue = $bValue & ! $this->testRecordExist($data);
+      $bValue = $bValue & ! $this->testRecordExist($data, $tblname);
 
     return $bValue;
   }
