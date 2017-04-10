@@ -109,6 +109,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
   public function setTable($tblname)
   {
     $this->tblname = $tblname;
+    $this->debug && trigger_error('Table was set to: ' . $tblname);
   }
 
   public function setHandlerAttr($attrName, $value)
