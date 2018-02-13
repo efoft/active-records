@@ -135,6 +135,7 @@ class MySQLHandler extends DataValidator implements HandlerInterface
   public function setDebug($debug = false)
   {
     $this->debug = (bool)$debug;
+    $this->qb->setDebug($debug);
   }
 
   /**
